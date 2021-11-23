@@ -8,7 +8,7 @@ import androidx.work.WorkerParameters
 class UploadWorker(context: Context,params: WorkerParameters): Worker(context,params) {
     override fun doWork(): Result {
         try {
-            for (i in 0..600000){
+            for (i in 0..6000){
                 Log.i("MYTAG","Uploading $i")
             }
 

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 
@@ -26,11 +27,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setOnTimeWorkRequest(){
+
+        val workManager = WorkManager.getInstance(applicationContext)
+
         val uploadRequest = OneTimeWorkRequest
             .Builder(UploadWorker::class.java)
             .build()
 
-        WorkManager.getInstance(applicationContext)
-            .enqueue(uploadRequest)
+        workManager.enqueue(uploadRequest)
+
+        //observe hasil
+        workManager.getWorkInfoByIdLiveData(uploadRequest.id)
+            .observe(this, Observer {
+                txtHasil?.text = it.state.name
+            })
     }
 }
