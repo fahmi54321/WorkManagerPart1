@@ -5,15 +5,16 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.Observer
-import androidx.work.Constraints
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
+import androidx.work.*
 
 class MainActivity : AppCompatActivity() {
 
     private var btnStart:Button?=null
     private var txtHasil:TextView?=null
+
+    companion object{
+        val KEY_COUNT_VALUE = "key_count"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         val workManager = WorkManager.getInstance(applicationContext)
 
+        //request data / kirim data ke Work Manager
+        val data = Data.Builder()
+            .putInt(KEY_COUNT_VALUE,125)
+            .build()
+
         //constraint
         val constraint = Constraints.Builder()
             .setRequiresCharging(true)
@@ -41,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         val uploadRequest = OneTimeWorkRequest
             .Builder(UploadWorker::class.java)
             .setConstraints(constraint)
+            .setInputData(data)
             .build()
 
         workManager.enqueue(uploadRequest)
@@ -49,6 +56,13 @@ class MainActivity : AppCompatActivity() {
         workManager.getWorkInfoByIdLiveData(uploadRequest.id)
             .observe(this, Observer {
                 txtHasil?.text = it.state.name
+
+                if (it.state.isFinished){
+                    val data = it.outputData
+                    val message = data.getString(UploadWorker.KEY_WOrKEr)
+                    txtHasil?.text = message
+                }
+
             })
     }
 }
