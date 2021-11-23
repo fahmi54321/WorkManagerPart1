@@ -50,7 +50,25 @@ class MainActivity : AppCompatActivity() {
             .setInputData(data)
             .build()
 
-        workManager.enqueue(uploadRequest)
+        val filteringRequest = OneTimeWorkRequest
+            .Builder(FilteringWorker::class.java)
+            .build()
+        val compressingWorker = OneTimeWorkRequest
+            .Builder(CompressingWorker::class.java)
+            .build()
+        val downloadingWorker = OneTimeWorkRequest
+            .Builder(DownloadingWorker::class.java)
+            .build()
+
+        val paraleWorks = mutableListOf<OneTimeWorkRequest>()
+        paraleWorks.add(downloadingWorker)
+        paraleWorks.add(filteringRequest)
+
+        workManager
+            .beginWith(filteringRequest)
+            .then(compressingWorker)
+            .then(uploadRequest)
+            .enqueue()
 
         //observe hasil
         workManager.getWorkInfoByIdLiveData(uploadRequest.id)
